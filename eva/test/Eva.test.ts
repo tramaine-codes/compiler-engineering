@@ -63,6 +63,52 @@ test("provides variable values", () => {
 	expect(eva.eval("foo")).toStrictEqual(20);
 });
 
+test("performs calculations on variable expressions", () => {
+	eva.eval(["var", "x", 10]);
+	eva.eval(["var", "y", 20]);
+
+	expect(eva.eval(["+", ["*", "x", "y"], 30])).toStrictEqual(230);
+});
+
+test("accepts blocks", () => {
+	expect(
+		eva.eval([
+			"begin",
+			["var", "x", 10],
+			["var", "y", 20],
+			["+", ["*", "x", "y"], 30],
+		]),
+	).toEqual(230);
+});
+
+test("provides blocks with their own environment", () => {
+	expect(
+		eva.eval([
+			"begin",
+			["var", "x", 10],
+			["begin", ["var", "x", 20], "x"],
+			"x",
+		]),
+	).toEqual(10);
+});
+
+test("provides blocks with access to its outer environment", () => {
+	expect(
+		eva.eval([
+			"begin",
+			["var", "x", 10],
+			["var", "result", ["begin", ["var", "y", ["+", "x", 20]], "y"]],
+			"result",
+		]),
+	).toEqual(30);
+});
+
+test("accepts assignments within nested environments", () => {
+	expect(
+		eva.eval(["begin", ["var", "x", 10], ["begin", ["set", "x", 20]], "x"]),
+	).toEqual(20);
+});
+
 test("throws a reference error when accessing a variable that is not defined", () => {
 	const variableName = "foo";
 

@@ -1,14 +1,20 @@
 import { Environment } from "./Environment.js";
 
-export type Exp = MathExp | string | Assign | Bool | null;
-type MathExp = number | Add | Sub | Mult | Div | Mod;
+export type Exp = MathExp | Bool | Str | Var | Assign | Block | Null;
+type MathExp = Add | Sub | Mult | Div | Mod | Num | Ident;
 type Add = ["+", MathExp, MathExp];
 type Sub = ["-", MathExp, MathExp];
 type Mult = ["*", MathExp, MathExp];
 type Div = ["/", MathExp, MathExp];
 type Mod = ["%", MathExp, MathExp];
-type Assign = ["var", string, Exp];
+type Num = number;
+type Ident = string;
+type Str = string;
+type Var = ["var", string, Exp];
+type Assign = ["set", string, Exp];
 type Bool = true | false;
+type Block = ["begin", Exp, ...Exp[]];
+type Null = null;
 
 export class Eva {
 	constructor(
@@ -40,37 +46,48 @@ export class Eva {
 		if (exp[0] === "+") {
 			const [_, x, y] = exp;
 
-			return (this.eval(x) as number) + (this.eval(y) as number);
+			return (this.eval(x, env) as number) + (this.eval(y, env) as number);
 		}
 
 		if (exp[0] === "-") {
 			const [_, x, y] = exp;
 
-			return (this.eval(x) as number) - (this.eval(y) as number);
+			return (this.eval(x, env) as number) - (this.eval(y, env) as number);
 		}
 
 		if (exp[0] === "*") {
 			const [_, x, y] = exp;
 
-			return (this.eval(x) as number) * (this.eval(y) as number);
+			return (this.eval(x, env) as number) * (this.eval(y, env) as number);
 		}
 
 		if (exp[0] === "/") {
 			const [_, x, y] = exp;
 
-			return (this.eval(x) as number) / (this.eval(y) as number);
+			return (this.eval(x, env) as number) / (this.eval(y, env) as number);
 		}
 
 		if (exp[0] === "%") {
 			const [_, x, y] = exp;
 
-			return (this.eval(x) as number) % (this.eval(y) as number);
+			return (this.eval(x, env) as number) % (this.eval(y, env) as number);
 		}
 
 		if (exp[0] === "var") {
 			const [_, name, value] = exp;
 
-			return env.define(name, this.eval(value));
+			return env.define(name, this.eval(value, env));
+		}
+
+		if (exp[0] === "set") {
+			const [_, name, value] = exp;
+
+			return env.assign(name, this.eval(value, env));
+		}
+
+		if (exp[0] === "begin") {
+			const blockEnv = new Environment({}, env);
+			return this.evalBlock(exp, blockEnv);
 		}
 
 		if (isVariableName(exp)) {
@@ -78,6 +95,17 @@ export class Eva {
 		}
 
 		throw `Unimplmented: ${JSON.stringify(exp)}`;
+	};
+
+	private evalBlock = (exp: Block, env: Environment) => {
+		const [_, ...expressions] = exp;
+		let result: Exp = null;
+
+		for (const expression of expressions) {
+			result = this.eval(expression, env);
+		}
+
+		return result;
 	};
 }
 
