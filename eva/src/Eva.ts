@@ -9,10 +9,10 @@ type Div = ["/", MathExp, MathExp];
 type Mod = ["%", MathExp, MathExp];
 type Num = number;
 type Ident = string;
+type Bool = true | false;
 type Str = string;
 type Var = ["var", string, Exp];
 type Assign = ["set", string, Exp];
-type Bool = true | false;
 type Block = ["begin", Exp, ...Exp[]];
 type Null = null;
 
