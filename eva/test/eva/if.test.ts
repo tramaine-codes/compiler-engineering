@@ -7,7 +7,7 @@ beforeEach(() => {
   eva = new Eva();
 });
 
-test('add version to global environment', () => {
+test('accepts if expressions', () => {
   expect(
     eva.eval([
       'begin',

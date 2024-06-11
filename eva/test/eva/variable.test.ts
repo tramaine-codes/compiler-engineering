@@ -22,6 +22,10 @@ test('accepts boolean variable declaration', () => {
   expect(eva.eval(['var', 'bar', false])).toEqual(false);
 });
 
+test('accepts null variable declaration', () => {
+  expect(eva.eval(['var', 'foo', null])).toEqual(null);
+});
+
 test('accepts math expressions for variable declaration', () => {
   expect(eva.eval(['var', 'foo', ['-', ['+', 10, 15], 2]])).toEqual(23);
 });

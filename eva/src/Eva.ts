@@ -1,6 +1,17 @@
+import type { NonNullExpression } from 'typescript';
 import { Environment } from './Environment.js';
 
-export type Exp = MathExp | Bool | Str | Var | Assign | Block | If | Pred;
+export type Exp =
+  | MathExp
+  | Bool
+  | Str
+  | Null
+  | Var
+  | Assign
+  | Block
+  | If
+  | While
+  | Pred;
 type MathExp = Add | Sub | Mult | Div | Mod | Num | Ident;
 type Add = ['+', MathExp, MathExp];
 type Sub = ['-', MathExp, MathExp];
@@ -11,12 +22,13 @@ type Num = number;
 type Ident = string;
 type Bool = true | false;
 type Str = string;
+type Null = null;
 type Var = ['var', string, Exp];
 type Assign = ['set', string, Exp];
 type Block = ['begin', Exp, ...Exp[]];
-type If = ['if', Pred, Exp, Exp];
-type Pred = ['>', Exp, Exp];
-type Null = null;
+type If = ['if', Pred, NonNullable<Exp>, NonNullable<Exp>];
+type While = ['while', Pred, Block];
+type Pred = ['>' | '<' | '>=' | '<=' | '==' | '!=', Exp, Exp];
 
 export class Eva {
   constructor(
@@ -34,6 +46,10 @@ export class Eva {
 
     if (this.isString(exp)) {
       return exp.slice(1, -1);
+    }
+
+    if (this.isNull(exp)) {
+      return null;
     }
 
     if (this.isBoolean(exp)) {
@@ -97,10 +113,54 @@ export class Eva {
       return this.eval(alternate, env);
     }
 
+    if (exp[0] === 'while') {
+      const [_, condition, block] = exp;
+      let result: Exp = null;
+
+      while (this.eval(condition, env)) {
+        result = this.eval(block, env);
+      }
+
+      return result;
+    }
+
     if (exp[0] === '>') {
       const [_, lhs, rhs] = exp;
 
-      return this.eval(lhs, env) > this.eval(rhs, env);
+      return (this.eval(lhs, env) ?? false) > (this.eval(rhs, env) ?? false);
+    }
+
+    if (exp[0] === '<') {
+      const [_, lhs, rhs] = exp;
+
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      return (this.eval(lhs, env) as any) < (this.eval(rhs, env) as any);
+    }
+
+    if (exp[0] === '>=') {
+      const [_, lhs, rhs] = exp;
+
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      return (this.eval(lhs, env) as any) >= (this.eval(rhs, env) as any);
+    }
+
+    if (exp[0] === '<=') {
+      const [_, lhs, rhs] = exp;
+
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      return (this.eval(lhs, env) as any) <= (this.eval(rhs, env) as any);
+    }
+
+    if (exp[0] === '==') {
+      const [_, lhs, rhs] = exp;
+
+      return this.eval(lhs, env) === this.eval(rhs, env);
+    }
+
+    if (exp[0] === '!=') {
+      const [_, lhs, rhs] = exp;
+
+      return this.eval(lhs, env) !== this.eval(rhs, env);
     }
 
     if (this.isVariableName(exp)) {
