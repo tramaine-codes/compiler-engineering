@@ -15,10 +15,6 @@ test('accepts strings as expressions', () => {
   expect(eva.eval('"hello"')).toStrictEqual('hello');
 });
 
-test('access null as an expression', () => {
-  expect(eva.eval(null)).toStrictEqual(null);
-});
-
 test('access booleans as expressions', () => {
   expect(eva.eval(true)).toStrictEqual(true);
   expect(eva.eval(false)).toStrictEqual(false);

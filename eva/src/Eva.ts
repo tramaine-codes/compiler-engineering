@@ -1,6 +1,6 @@
 import { Environment } from './Environment.js';
 
-export type Exp = MathExp | Bool | Str | Var | Assign | Block | Null;
+export type Exp = MathExp | Bool | Str | Var | Assign | Block | If | Pred;
 type MathExp = Add | Sub | Mult | Div | Mod | Num | Ident;
 type Add = ['+', MathExp, MathExp];
 type Sub = ['-', MathExp, MathExp];
@@ -14,13 +14,14 @@ type Str = string;
 type Var = ['var', string, Exp];
 type Assign = ['set', string, Exp];
 type Block = ['begin', Exp, ...Exp[]];
+type If = ['if', Pred, Exp, Exp];
+type Pred = ['>', Exp, Exp];
 type Null = null;
 
 export class Eva {
   constructor(
     private readonly global = new Environment({
       false: false,
-      null: null,
       true: true,
       VERSION: '0.1.0',
     })
@@ -33,10 +34,6 @@ export class Eva {
 
     if (this.isString(exp)) {
       return exp.slice(1, -1);
-    }
-
-    if (this.isNull(exp)) {
-      return null;
     }
 
     if (this.isBoolean(exp)) {
@@ -90,6 +87,22 @@ export class Eva {
       return this.evalBlock(exp, blockEnv);
     }
 
+    if (exp[0] === 'if') {
+      const [_, condition, consequent, alternate] = exp;
+
+      if (this.eval(condition, env)) {
+        return this.eval(consequent, env);
+      }
+
+      return this.eval(alternate, env);
+    }
+
+    if (exp[0] === '>') {
+      const [_, lhs, rhs] = exp;
+
+      return this.eval(lhs, env) > this.eval(rhs, env);
+    }
+
     if (this.isVariableName(exp)) {
       return env.lookup(exp);
     }
@@ -112,12 +125,10 @@ export class Eva {
 
   private evalBlock = (exp: Block, env: Environment) => {
     const [_, ...expressions] = exp;
-    let result: Exp = null;
 
-    for (const expression of expressions) {
-      result = this.eval(expression, env);
-    }
-
-    return result;
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    return expressions
+      .map((expression) => this.eval(expression, env))
+      .at(expressions.length - 1)!;
   };
 }

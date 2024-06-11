@@ -23,7 +23,7 @@ export class Environment {
   };
 
   private resolve = (name: string): Environment => {
-    if (this.record[name]) {
+    if (Object.hasOwn(this.record, name)) {
       return this;
     }
 

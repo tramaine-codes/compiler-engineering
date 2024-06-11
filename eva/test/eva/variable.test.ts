@@ -12,18 +12,14 @@ test('accepts variable declarations', () => {
 });
 
 test('provides variable values', () => {
-  eva.eval(['var', 'foo', 20]);
+  eva.eval(['var', 'foo', 0]);
 
-  expect(eva.eval('foo')).toStrictEqual(20);
+  expect(eva.eval('foo')).toStrictEqual(0);
 });
 
 test('accepts boolean variable declaration', () => {
   expect(eva.eval(['var', 'foo', true])).toEqual(true);
   expect(eva.eval(['var', 'bar', false])).toEqual(false);
-});
-
-test('accepts null variable declaration', () => {
-  expect(eva.eval(['var', 'foo', null])).toEqual(null);
 });
 
 test('accepts math expressions for variable declaration', () => {
