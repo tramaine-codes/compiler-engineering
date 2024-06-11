@@ -27,19 +27,19 @@ export class Eva {
   ) {}
 
   eval = (exp: Exp, env = this.global): Exp => {
-    if (isNumber(exp)) {
+    if (this.isNumber(exp)) {
       return exp;
     }
 
-    if (isString(exp)) {
+    if (this.isString(exp)) {
       return exp.slice(1, -1);
     }
 
-    if (isNull(exp)) {
+    if (this.isNull(exp)) {
       return null;
     }
 
-    if (isBoolean(exp)) {
+    if (this.isBoolean(exp)) {
       return exp;
     }
 
@@ -90,12 +90,25 @@ export class Eva {
       return this.evalBlock(exp, blockEnv);
     }
 
-    if (isVariableName(exp)) {
+    if (this.isVariableName(exp)) {
       return env.lookup(exp);
     }
 
     throw `Unimplmented: ${JSON.stringify(exp)}`;
   };
+
+  private isNumber = (exp: unknown): exp is number => typeof exp === 'number';
+
+  private isString = (exp: unknown): exp is string =>
+    typeof exp === 'string' && exp.at(0) === '"' && exp.slice(-1) === '"';
+
+  private isNull = (exp: unknown): exp is null => exp === null;
+
+  private isBoolean = (exp: unknown): exp is boolean =>
+    exp === true || exp === false;
+
+  private isVariableName = (exp: unknown): exp is string =>
+    typeof exp === 'string' && /^[a-zA-Z][a-zA-Z0-9_]*$/.test(exp);
 
   private evalBlock = (exp: Block, env: Environment) => {
     const [_, ...expressions] = exp;
@@ -108,16 +121,3 @@ export class Eva {
     return result;
   };
 }
-
-const isNumber = (exp: unknown): exp is number => typeof exp === 'number';
-
-const isString = (exp: unknown): exp is string =>
-  typeof exp === 'string' && exp.at(0) === '"' && exp.slice(-1) === '"';
-
-const isNull = (exp: unknown): exp is null => exp === null;
-
-const isBoolean = (exp: unknown): exp is boolean =>
-  exp === true || exp === false;
-
-const isVariableName = (exp: unknown): exp is string =>
-  typeof exp === 'string' && /^[a-zA-Z][a-zA-Z0-9_]*$/.test(exp);
