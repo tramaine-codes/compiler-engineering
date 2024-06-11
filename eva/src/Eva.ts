@@ -1,123 +1,123 @@
-import { Environment } from "./Environment.js";
+import { Environment } from './Environment.js';
 
 export type Exp = MathExp | Bool | Str | Var | Assign | Block | Null;
 type MathExp = Add | Sub | Mult | Div | Mod | Num | Ident;
-type Add = ["+", MathExp, MathExp];
-type Sub = ["-", MathExp, MathExp];
-type Mult = ["*", MathExp, MathExp];
-type Div = ["/", MathExp, MathExp];
-type Mod = ["%", MathExp, MathExp];
+type Add = ['+', MathExp, MathExp];
+type Sub = ['-', MathExp, MathExp];
+type Mult = ['*', MathExp, MathExp];
+type Div = ['/', MathExp, MathExp];
+type Mod = ['%', MathExp, MathExp];
 type Num = number;
 type Ident = string;
 type Bool = true | false;
 type Str = string;
-type Var = ["var", string, Exp];
-type Assign = ["set", string, Exp];
-type Block = ["begin", Exp, ...Exp[]];
+type Var = ['var', string, Exp];
+type Assign = ['set', string, Exp];
+type Block = ['begin', Exp, ...Exp[]];
 type Null = null;
 
 export class Eva {
-	constructor(
-		private readonly global = new Environment({
-			false: false,
-			null: null,
-			true: true,
-			VERSION: "0.1.0",
-		}),
-	) {}
+  constructor(
+    private readonly global = new Environment({
+      false: false,
+      null: null,
+      true: true,
+      VERSION: '0.1.0',
+    })
+  ) {}
 
-	eval = (exp: Exp, env = this.global): Exp => {
-		if (isNumber(exp)) {
-			return exp;
-		}
+  eval = (exp: Exp, env = this.global): Exp => {
+    if (isNumber(exp)) {
+      return exp;
+    }
 
-		if (isString(exp)) {
-			return exp.slice(1, -1);
-		}
+    if (isString(exp)) {
+      return exp.slice(1, -1);
+    }
 
-		if (isNull(exp)) {
-			return null;
-		}
+    if (isNull(exp)) {
+      return null;
+    }
 
-		if (isBoolean(exp)) {
-			return exp;
-		}
+    if (isBoolean(exp)) {
+      return exp;
+    }
 
-		if (exp[0] === "+") {
-			const [_, x, y] = exp;
+    if (exp[0] === '+') {
+      const [_, x, y] = exp;
 
-			return (this.eval(x, env) as number) + (this.eval(y, env) as number);
-		}
+      return (this.eval(x, env) as number) + (this.eval(y, env) as number);
+    }
 
-		if (exp[0] === "-") {
-			const [_, x, y] = exp;
+    if (exp[0] === '-') {
+      const [_, x, y] = exp;
 
-			return (this.eval(x, env) as number) - (this.eval(y, env) as number);
-		}
+      return (this.eval(x, env) as number) - (this.eval(y, env) as number);
+    }
 
-		if (exp[0] === "*") {
-			const [_, x, y] = exp;
+    if (exp[0] === '*') {
+      const [_, x, y] = exp;
 
-			return (this.eval(x, env) as number) * (this.eval(y, env) as number);
-		}
+      return (this.eval(x, env) as number) * (this.eval(y, env) as number);
+    }
 
-		if (exp[0] === "/") {
-			const [_, x, y] = exp;
+    if (exp[0] === '/') {
+      const [_, x, y] = exp;
 
-			return (this.eval(x, env) as number) / (this.eval(y, env) as number);
-		}
+      return (this.eval(x, env) as number) / (this.eval(y, env) as number);
+    }
 
-		if (exp[0] === "%") {
-			const [_, x, y] = exp;
+    if (exp[0] === '%') {
+      const [_, x, y] = exp;
 
-			return (this.eval(x, env) as number) % (this.eval(y, env) as number);
-		}
+      return (this.eval(x, env) as number) % (this.eval(y, env) as number);
+    }
 
-		if (exp[0] === "var") {
-			const [_, name, value] = exp;
+    if (exp[0] === 'var') {
+      const [_, name, value] = exp;
 
-			return env.define(name, this.eval(value, env));
-		}
+      return env.define(name, this.eval(value, env));
+    }
 
-		if (exp[0] === "set") {
-			const [_, name, value] = exp;
+    if (exp[0] === 'set') {
+      const [_, name, value] = exp;
 
-			return env.assign(name, this.eval(value, env));
-		}
+      return env.assign(name, this.eval(value, env));
+    }
 
-		if (exp[0] === "begin") {
-			const blockEnv = new Environment({}, env);
-			return this.evalBlock(exp, blockEnv);
-		}
+    if (exp[0] === 'begin') {
+      const blockEnv = new Environment({}, env);
+      return this.evalBlock(exp, blockEnv);
+    }
 
-		if (isVariableName(exp)) {
-			return env.lookup(exp);
-		}
+    if (isVariableName(exp)) {
+      return env.lookup(exp);
+    }
 
-		throw `Unimplmented: ${JSON.stringify(exp)}`;
-	};
+    throw `Unimplmented: ${JSON.stringify(exp)}`;
+  };
 
-	private evalBlock = (exp: Block, env: Environment) => {
-		const [_, ...expressions] = exp;
-		let result: Exp = null;
+  private evalBlock = (exp: Block, env: Environment) => {
+    const [_, ...expressions] = exp;
+    let result: Exp = null;
 
-		for (const expression of expressions) {
-			result = this.eval(expression, env);
-		}
+    for (const expression of expressions) {
+      result = this.eval(expression, env);
+    }
 
-		return result;
-	};
+    return result;
+  };
 }
 
-const isNumber = (exp: unknown): exp is number => typeof exp === "number";
+const isNumber = (exp: unknown): exp is number => typeof exp === 'number';
 
 const isString = (exp: unknown): exp is string =>
-	typeof exp === "string" && exp.at(0) === '"' && exp.slice(-1) === '"';
+  typeof exp === 'string' && exp.at(0) === '"' && exp.slice(-1) === '"';
 
 const isNull = (exp: unknown): exp is null => exp === null;
 
 const isBoolean = (exp: unknown): exp is boolean =>
-	exp === true || exp === false;
+  exp === true || exp === false;
 
 const isVariableName = (exp: unknown): exp is string =>
-	typeof exp === "string" && /^[a-zA-Z][a-zA-Z0-9_]*$/.test(exp);
+  typeof exp === 'string' && /^[a-zA-Z][a-zA-Z0-9_]*$/.test(exp);
