@@ -1,4 +1,3 @@
-import type { NonNullExpression } from 'typescript';
 import { Environment } from './Environment.js';
 
 export type Exp =
