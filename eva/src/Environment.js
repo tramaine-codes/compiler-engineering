@@ -1,28 +1,23 @@
-import type { Exp } from './Eva.js';
-
 export class Environment {
-  constructor(
-    private readonly record: Record<string, Exp> = {},
-    private readonly parent?: Environment
-  ) {}
+  constructor(record = {}, parent = undefined) {
+    this.record = record;
+    this.parent = parent;
+  }
 
-  define = (name: string, value: Exp) => {
+  define = (name, value) => {
     this.record[name] = value;
     return value;
   };
 
-  lookup = (name: string) => {
-    const { record } = this.resolve(name);
-    return record[name];
-  };
+  lookup = (name) => this.resolve(name).record[name];
 
-  assign = (name: string, value: Exp) => {
+  assign = (name, value) => {
     const { record } = this.resolve(name);
     record[name] = value;
     return record[name];
   };
 
-  private resolve = (name: string): Environment => {
+  resolve = (name) => {
     if (Object.hasOwn(this.record, name)) {
       return this;
     }
