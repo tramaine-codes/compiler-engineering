@@ -1,5 +1,6 @@
 import { beforeEach, expect, test } from 'bun:test';
 import { Eva } from '../../src/Eva.js';
+import * as tu from './test-util.js';
 
 let eva: Eva;
 
@@ -41,4 +42,17 @@ test('performs calculations on variable expressions', () => {
   eva.eval(['var', 'y', 20]);
 
   expect(eva.eval(['+', ['*', 'x', 'y'], 30])).toStrictEqual(230);
+});
+
+test('foo', () => {
+  tu.test(
+    eva,
+    `
+    (begin
+      (var x 10)
+      (var y 20)
+      (+ (* x 10) y))
+`,
+    120
+  );
 });
