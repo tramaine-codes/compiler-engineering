@@ -3,7 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "1.1.9",
+    "@types/bun": "1.1.14",
     "syntax-cli": "0.1.27"
   },
   "peerDependencies": {
